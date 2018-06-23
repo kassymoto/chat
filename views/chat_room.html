@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <meta charset="UTF-8">
+    <title>L〇NE</title>
+     % include("library.html")
+     <style>
+         .chat_area {
+             padding-left: 20px;
+             overflow:auto;
+             height:600px;/*ここはご自由に*/
+             width: 468px;/*ここはご自由に*/
+             vertical-align:bottom;
+             background-color: #eee;
+         }
+         .kaiwa {
+             margin-bottom: 25px;
+         }
+         /* 左画像 */
+         .kaiwa-img-left {
+           margin: 0;
+           float: left;
+           width: 60px;
+           height: 60px;
+           margin-right: -70px;
+         }
+         /* 右画像 */
+         .kaiwa-img-right {
+           margin: 0;
+           float: right;
+           width: 60px;
+           height: 60px;
+           margin-left: -70px;
+         }
+         .kaiwa figure img {
+           width: 100%;
+           height: 100%;
+           border: 1px solid #aaa;
+           border-radius: 50%;
+           margin: 0;
+         }
+         /* 画像の下のテキスト */
+         .kaiwa-img-description {
+           padding: 10px 0px 0;
+           font-size: 15px;
+           text-align: center;
+           position: relative;
+           bottom: 15px;
+         }
+         /* 左からの吹き出しテキスト */
+         .kaiwa-text-right {
+           position: relative;
+           margin-left: 80px;
+           margin-top: 10px;
+           padding: 10px;
+           border-radius: 10px;
+           background: rgb(224, 224, 224);
+           margin-right: 12%;
+           float: left;
+         }
+         /* 右からの吹き出しテキスト */
+         .kaiwa-text-left {
+           position: relative;
+           margin-right: 80px;
+           margin-top: 10px;
+           padding: 10px;
+           border-radius: 10px;
+           background-color: rgb(79, 228, 121);
+           margin-left: 12%;
+           float: right;
+         }
+         .talk_time_right{
+           position: relative;
+           margin-right: 80px;
+           margin-top: -5%;
+           margin-bottom: 20px;
+           float: right;
+         }
+         .talk_time_left{
+           position: relative;
+           margin-left: 80px;
+           margin-top: -20px;
+           margin-bottom: 20px;
+           float: left;
+         }
+         p.kaiwa-text {
+           margin: 0 0 20px;
+         }
+         p.kaiwa-text:last-child {
+           margin-bottom: 0;
+         }
+         /* 左の三角形を作る */
+         .kaiwa-text-right:before {
+           position: absolute;
+           content: '';
+           border: 10px solid transparent;
+           top: 15px;
+           left: -20px;
+         }
+         .kaiwa-text-right:after {
+           position: absolute;
+           content: '';
+           border: 10px solid transparent;
+           border-right: 10px solid rgb(224, 224, 224);
+           top: 15px;
+           left: -19px;
+         }
+         /* 右の三角形を作る */
+         .kaiwa-text-left:before {
+           position: absolute;
+           content: '';
+           border: 10px solid transparent;
+           top: 15px;
+           right: -20px;
+         }
+         .kaiwa-text-left:after {
+           position: absolute;
+           content: '';
+           border: 10px solid transparent;
+           border-left: 10px solid rgb(79, 228, 121);
+           top: 15px;
+           right: -19px;
+         }
+         /* 回り込み解除 */
+         .kaiwa:after,.kaiwa:before {
+           clear: both;
+           content: "";
+           display: block;
+         }
+
+         #your_container{
+             height:600px;
+             width: 455px;
+         }
+
+         #bms_messages_container{
+             height: 100%;
+             width: 100%;
+             background-color: #eee;
+         }
+
+         #bms_chat_header {
+             padding: 6px;/*隙間調整*/
+             font-size: 16px;
+             height: 34px;
+             background: #ddd;
+             border: 1px solid #ccc;
+         }
+         #bms_chat_user_status {
+             float: left;/* bms_chat_headerに対して左寄せ */
+         }
+
+         #bms_status_icon {
+             float: left;/* bms_chat_user_statusに対して左寄せ */
+             line-height: 2em;/*高さ調整*/
+         }
+
+         #bms_chat_user_name {
+              float: left;/* bms_chat_user_statusに対して左寄せ */
+             line-height: 1.5em;/*高さ調整*/
+             padding-left: 8px;
+          }
+
+         #bms_messages {
+             height:100%;/*テキストエリアが下に張り付く様にする*/
+             border-right: 1px solid #ddd;
+             border-left: 1px solid #ddd;
+             background-color: #eee;
+             box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2) inset;/*ヘッダーの下に影を入れる*/
+         }
+
+         #bms_send {
+             background-color:#eee;/*タイムラインの色と同じにする*/
+             border-right: 1px solid #ddd;
+             border-left: 1px solid #ddd;
+             border-bottom: 1px solid #ddd;
+             height: 60px;
+             padding: 4px;
+         }
+
+         #bms_send_message{
+             width: calc(100% - 75px);/*常に送信ボタンの横幅を引いたサイズに動的に計算*/
+             line-height: 16px;
+             height: 48px;
+             padding: 14px 6px 0px 6px;/*文字がテキストエリアの中心になる様に隙間調整*/
+             border: 1px solid #ccc;
+             border-radius: 4px;/*角丸*/
+             text-align: left;/*文字を左寄せ*/
+             box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.2) inset;/*内側に影を入れてテキストエリアらしくした*/
+             box-sizing: border-box;/*paddingとborderの要素の高さと幅の影響をなくす（要素に高さと幅を含める）*/
+         }
+
+         #bms_send_btn {
+             width: 72px;
+             height: 48px;
+             font-size: 16px;
+             float: right;/*bms_sendに対して右寄せ*/
+             color: #fff;
+             font-weight: bold;
+             background: #bcbcbc;
+             text-align: center;/*文字をボタン中央に表示*/
+             border: 1px solid #bbb;
+             box-sizing: border-box;/*paddingとborderの要素の高さと幅の影響をなくす（要素に高さと幅を含める）*/
+         }
+
+         #bms_send_btn:hover {
+             background: #13178E; /*マウスポインタを当てた時にアクティブな色になる*/
+             cursor: pointer;/*マウスポインタを当てた時に、カーソルが指の形になる*/
+         }
+
+         div::-webkit-scrollbar{
+            width: 12px;
+        　}
+
+          div::-webkit-scrollbar-track{
+            background: #fff;
+            border: none;
+            border-radius: 10px;
+            box-shadow: inset 0 0 2px #777;
+          }
+
+          div::-webkit-scrollbar-thumb{
+            background: #aaa;
+            border-radius: 10px;
+            box-shadow: none;
+          }
+     </style>
+</head>
+<body>
+
+<div id="your_container">
+  <div id="bms_messages_container">
+      <div id="bms_chat_header">
+          <div id="bms_chat_user_status">
+              <div id="bms_chat_user_name">ChatApp</div>
+          </div>
+      </div>
+
+      <div id="bms_messages">
+        <div id="chart_area" class="chat_area row col-md-12">
+        </div>
+      </div>
+
+        <div id="bms_send">
+          <div id="input_area" class="row col-md-12">
+              <form method="POST" action="#" id="talkForm">
+                  <textarea id="bms_send_message" name="chat" cols="25" rows="4" required></textarea>
+                  <div id="bms_send_btn"><input type="submit" value="Send" style="WIDTH: 70px; HEIGHT: 46px" /></div>
+              </form>
+          </div>
+        </div>
+  </div>
+</div>
+
+
+<script>
+    //最終発言のデータを格納する
+    var LAST_TALK = null;
+
+    //ページ表示時に発言データを取得・表示する
+    $(document).ready(function(){
+        getTalkData();
+    });
+
+    // フォームの更新を非同期通信に割り当て
+    $("#talkForm").on("submit", function(event){
+        event.preventDefault();
+        saveTalkData();
+    });
+
+    // 3秒毎に更新の有無をサーバに問合せる
+    setInterval(checkUpdate, 3000);
+
+    // 発言データの送信
+    function saveTalkData(){
+        $.ajax({
+            type: "POST",
+            url: "/api/talk",
+            data: {
+                "chat": $("textarea[name='chat']").val()
+            },
+            dataType: "json"
+        }).done(function(data){
+            if(data["status"] != "success"){
+                alert("ERROR");
+            }else{
+                // 入力欄のクリア
+                $("textarea[name='chat']").val("");
+                // チャット欄の更新
+                getTalkData();
+            }
+        }).fail(function(data){
+            console.error(data);
+        });
+    }
+
+    //発言データの取得
+    function getTalkData(){
+        $.ajax({
+            type: "GET",
+            url: "/api/talk",
+            dataType: "json"
+        }).done(function(data){
+            //JSONを受け取り各発言のDOMを構築する
+            $("#chart_area").empty();
+            for(var i in data){
+                appendTalkNode(data[i].talk_time, data[i].username, data[i].chat_data);
+                LAST_TALK = data[i];
+            }
+        }).fail(function(data){
+            console.error(data);
+        });
+    }
+    //発言時間の体裁を整える
+    function adjust_date_time(talkTime){
+      var d = talkTime.match(/-\d{2}-\d{2}/);
+      var date = String(Number(d[0].split('-')[1]))+"月"+d[0].split('-')[2]+"日 ";
+
+      var t = talkTime.match(/\d{2}:\d{2}/);
+      var h = Number(t[0].split(':')[0]);
+      var m = Number(t[0].split(':')[1]);
+      var time;
+      var minute;
+
+      if(m<10){
+          minute = "0"+String(m);
+      }
+      else{
+          minute = String(m);
+      }
+
+      if(h==12){
+          time = "午後 "+String(h)+":"+minute;
+      }
+      else if(h>12){
+          time = "午後 "+String(h-12)+":"+minute;
+      }
+      else{
+          time = "午前 "+String(h)+":"+minute;
+      }
+
+      return date+time;
+    }
+
+    // 発言データのDOMを追加する
+    function appendTalkNode(talkTime, userName, chatData){
+        // チャット表示領域
+        var chatArea = $("#chart_area");
+        // 発言の外側のDIV要素
+        var rowDiv = $("<div></div>", {"class": "row"});
+        // 発言の内側のDIV要素
+
+        var kaiwa = $("<div></div>", {"class": "kaiwa"});
+        var talkDiv;
+        var figre;
+        var figcaption;
+        var name;
+        var img;
+        var kaiwa_text;
+        var talk_time;
+        var date_time = adjust_date_time(talkTime);
+        // 自分の発言かどうかの分岐
+         if (userName == "{{username}}"){
+             talkDiv = $("<div></div>", {
+                "class": "kaiwa-text-left",
+                "title": talkTime
+             });
+             kaiwa_text = $("<p></p>",{"class": "kaiwa-text"});
+             figre = $("<figre></figre>", {"class": "kaiwa-img-right"});
+
+             figcaption = $("<figcaption></figcaption>", {"class": "kaiwa-img-description"});
+             figcaption.text(userName);
+
+             kaiwa_text.text(chatData);
+             talkDiv.append(kaiwa_text);
+             img = $("<img/>", {
+               "src": "images/r_user.png",
+               "alt": "no-mage",
+               "width": "60",
+               "height": "60"
+             });
+             talk_time = $("<p></p>",{"class": "talk_time_right"});
+             talk_time.text(date_time);
+         }else{
+             talkDiv = $("<div></div>", {
+                "class": "kaiwa-text-right",
+                "title": talkTime
+             });
+             kaiwa_text = $("<p></p>",{"class": "kaiwa-text"});
+             figre = $("<figre></figre>", {"class": "kaiwa-img-left"});
+             figcaption = $("<figcaption></figcaption>", {"class": "kaiwa-img-description"});
+             figcaption.text(userName);
+             kaiwa_text.text(chatData);
+             talkDiv.append(kaiwa_text);
+
+             img = $("<img/>", {
+               "src": "images/l_user.png",
+               "alt": "no-mage",
+               "width": "60",
+               "height": "60"
+             });
+             talk_time = $("<p></p>",{"class": "talk_time_left"});
+             talk_time.text(date_time);
+         }
+
+        figre.append(img);
+        figre.append(figcaption);
+        kaiwa.append(figre);
+        kaiwa.append(talkDiv);
+        rowDiv.append(kaiwa);
+        rowDiv.append(talk_time);
+        chatArea.append(rowDiv);
+
+        // 追加した発言の位置へスクロール
+        chatScrollBottom();
+    }
+
+    // サーバ側とクライアント側で最後の発言を比較して
+    // 差があれば表示を更新する
+    function checkUpdate(){
+        $.ajax({
+            type: "GET",
+            url: "/api/last_talk",
+            dataType: "json"
+        }).done(function(data){
+
+            // 最後の発言の比較
+            if(data.username === LAST_TALK.username &&
+               data.talk_time === LAST_TALK.talk_time &&
+               data.chat_data === LAST_TALK.chat_data){
+                console.log("not need update");
+            }else{
+                // 更新を実行
+                getTalkData();
+            }
+
+        }).fail(function(data){
+            console.error(data);
+        });
+    }
+
+    function chatScrollBottom(){
+        // 最下部へのスクロール
+        $('#chart_area').animate({scrollTop: $('#chart_area')[0].scrollHeight}, 0);
+
+    }
+
+</script>
+
+</body>
+</html>
