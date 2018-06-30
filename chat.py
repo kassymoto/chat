@@ -208,4 +208,4 @@ def get_user_pass():
     return user_pass
 
 # サーバの起動
-run(host='localhost', port=8080, debug=True, reloader=True)
+run(host="0.0.0.0", port=int(os.environ.get("PORT",5000)))
